@@ -1,3 +1,3 @@
-module github.com/arunsundaram50/go-helpers/fiber
+module fiber
 
 go 1.21.0
