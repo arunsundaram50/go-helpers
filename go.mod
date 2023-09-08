@@ -1,4 +1,4 @@
-module go-helpers
+module github.com/arunsundaram50/go-helpers
 
 go 1.21.0
 
