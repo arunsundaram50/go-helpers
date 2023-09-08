@@ -3,7 +3,7 @@ package fiber
 import (
 	"fmt"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
 var F = fmt.Sprintf
