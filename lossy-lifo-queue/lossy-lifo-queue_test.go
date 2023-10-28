@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
-	comparator := func(a, b interface{}) bool {
-		return a.(int) == b.(int)
-	}
+var comparator = func(a, b interface{}) bool {
+	return a.(int) == b.(int)
+}
 
+func TestOperations(t *testing.T) {
 	queue := NewLossyLifoQueue(3, comparator)
 	queue.Add(1)
 	queue.Add(2)
@@ -45,4 +45,19 @@ func Test(t *testing.T) {
 	if queue.String() != expected {
 		t.Fatalf("Expected %s, got %s", expected, fmt.Sprintf("%v", queue))
 	}
+}
+
+func TestSaveLoad(t *testing.T) {
+	queueForSaving := NewLossyLifoQueue(3, comparator)
+	queueForSaving.Add(3)
+	queueForSaving.Add(2)
+	queueForSaving.Save("/tmp/x.json")
+
+	var queueLoaded = NewLossyLifoQueue(3, comparator)
+	queueLoaded.Load("/tmp/x.json")
+	expected := "[3, 2]"
+	if queueLoaded.String() != expected {
+		t.Fatalf("Expected %s, got %s", expected, fmt.Sprintf("%v", queueLoaded))
+	}
+
 }
