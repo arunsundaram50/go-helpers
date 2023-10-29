@@ -4,21 +4,20 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 )
 
 type LossyLifoQueue struct {
-	data       *list.List
-	maxSize    int
+	Data       *list.List
+	MaxSize    int
 	comparator func(interface{}, interface{}) bool
 	lookup     map[interface{}]*list.Element
 }
 
 func NewLossyLifoQueue(maxSize int, comparator func(interface{}, interface{}) bool) *LossyLifoQueue {
 	return &LossyLifoQueue{
-		data:       list.New(),
-		maxSize:    maxSize,
+		Data:       list.New(),
+		MaxSize:    maxSize,
 		comparator: comparator,
 		lookup:     make(map[interface{}]*list.Element),
 	}
@@ -27,43 +26,43 @@ func NewLossyLifoQueue(maxSize int, comparator func(interface{}, interface{}) bo
 func (llq *LossyLifoQueue) Add(item interface{}) {
 	// Check if item exists using the lookup map
 	if elem, found := llq.lookup[item]; found {
-		llq.data.Remove(elem)
+		llq.Data.Remove(elem)
 	}
 
 	// Add item to the end
-	newElem := llq.data.PushBack(item)
+	newElem := llq.Data.PushBack(item)
 	llq.lookup[item] = newElem
 
 	// Check size constraints
-	if llq.data.Len() > llq.maxSize {
-		removedElem := llq.data.Front()
-		llq.data.Remove(removedElem)
+	if llq.Data.Len() > llq.MaxSize {
+		removedElem := llq.Data.Front()
+		llq.Data.Remove(removedElem)
 		delete(llq.lookup, removedElem.Value)
 	}
 }
 
 func (llq *LossyLifoQueue) Pop() interface{} {
-	if llq.data.Len() == 0 {
+	if llq.Data.Len() == 0 {
 		return nil
 	}
-	lastElem := llq.data.Back()
-	llq.data.Remove(lastElem)
+	lastElem := llq.Data.Back()
+	llq.Data.Remove(lastElem)
 	delete(llq.lookup, lastElem.Value)
 	return lastElem.Value
 }
 
 func (llq *LossyLifoQueue) Peek() interface{} {
-	if llq.data.Len() == 0 {
+	if llq.Data.Len() == 0 {
 		return nil
 	}
-	return llq.data.Back().Value
+	return llq.Data.Back().Value
 }
 
 func (llq *LossyLifoQueue) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("[")
 	firstItem := true
-	for e := llq.data.Front(); e != nil; e = e.Next() {
+	for e := llq.Data.Front(); e != nil; e = e.Next() {
 		if firstItem {
 			firstItem = false
 		} else {
@@ -75,57 +74,40 @@ func (llq *LossyLifoQueue) String() string {
 	return sb.String()
 }
 
-// serialization part
-
-type serializableQueue struct {
-	Items   []interface{} `json:"items"`
-	MaxSize int           `json:"maxSize"`
-}
-
-func (llq *LossyLifoQueue) Save(filename string) error {
-	// Extract the items from the linked list into a slice.
+func (llq *LossyLifoQueue) MarshalJSON() ([]byte, error) {
+	// Extract items from the linked list into a slice for easier marshaling.
 	var items []interface{}
-	for e := llq.data.Front(); e != nil; e = e.Next() {
+	for e := llq.Data.Front(); e != nil; e = e.Next() {
 		items = append(items, e.Value)
 	}
 
-	// Convert the list and maxSize into a serializable struct.
-	toSave := serializableQueue{
+	// Create an auxiliary struct that represents the data we want to marshal.
+	aux := struct {
+		Items   []interface{} `json:"items"`
+		MaxSize int           `json:"maxSize"`
+	}{
 		Items:   items,
-		MaxSize: llq.maxSize,
+		MaxSize: llq.MaxSize,
 	}
 
-	// Serialize the struct to JSON.
-	data, err := json.Marshal(toSave)
-	if err != nil {
-		return err
-	}
-
-	// Write the JSON data to the specified file.
-	return os.WriteFile(filename, data, 0644)
+	return json.Marshal(aux)
 }
 
-func (llq *LossyLifoQueue) Load(filename string) error {
-	data, err := os.ReadFile(filename)
-	if err != nil {
+func (llq *LossyLifoQueue) UnmarshalJSON(data []byte) error {
+	aux := &struct {
+		Items   []interface{} `json:"items"`
+		MaxSize int           `json:"maxSize"`
+	}{}
+
+	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
 
-	var loadedData serializableQueue
-	err = json.Unmarshal(data, &loadedData)
-	if err != nil {
-		return err
+	llq.Data = list.New()
+	for _, item := range aux.Items {
+		llq.Data.PushBack(item)
 	}
-
-	// Clear the current queue.
-	llq.data.Init()
-	llq.lookup = make(map[interface{}]*list.Element)
-	llq.maxSize = loadedData.MaxSize
-
-	// Refill the queue using the loaded data.
-	for _, item := range loadedData.Items {
-		llq.Add(item)
-	}
+	llq.MaxSize = aux.MaxSize
 
 	return nil
 }

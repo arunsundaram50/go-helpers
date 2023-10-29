@@ -1,7 +1,9 @@
 package lossylifoqueue
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -9,7 +11,7 @@ var comparator = func(a, b interface{}) bool {
 	return a.(int) == b.(int)
 }
 
-func TestOperations(t *testing.T) {
+func TestIntOperations(t *testing.T) {
 	queue := NewLossyLifoQueue(3, comparator)
 	queue.Add(1)
 	queue.Add(2)
@@ -47,14 +49,38 @@ func TestOperations(t *testing.T) {
 	}
 }
 
+func strComparator(a, b interface{}) bool {
+	return a.(string) == b.(string)
+}
+
+func TestStringOperations(t *testing.T) {
+	lastDir := NewLossyLifoQueue(10, strComparator)
+	lastDir.Add("hello")
+	lastDir.Add("World")
+	fmt.Println(lastDir)
+}
+
 func TestSaveLoad(t *testing.T) {
+	filename := "/tmp/x.json"
 	queueForSaving := NewLossyLifoQueue(3, comparator)
 	queueForSaving.Add(3)
 	queueForSaving.Add(2)
-	queueForSaving.Save("/tmp/x.json")
+	bytes, err := json.MarshalIndent(queueForSaving, "", " ")
+	if err != nil {
+		t.Fatalf("Unable to marshal queue: %v", err)
+	}
+	os.WriteFile(filename, bytes, 0644)
 
 	var queueLoaded = NewLossyLifoQueue(3, comparator)
-	queueLoaded.Load("/tmp/x.json")
+	readBytes, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatalf("Unable to read %s: %v", filename, err)
+	}
+
+	if err := json.Unmarshal(readBytes, &queueLoaded); err != nil {
+		t.Fatalf("Unable to unmarshal %s: %v", filename, err)
+	}
+
 	expected := "[3, 2]"
 	if queueLoaded.String() != expected {
 		t.Fatalf("Expected %s, got %s", expected, fmt.Sprintf("%v", queueLoaded))
