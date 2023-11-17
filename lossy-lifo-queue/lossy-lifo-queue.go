@@ -74,6 +74,14 @@ func (llq *LossyLifoQueue) String() string {
 	return sb.String()
 }
 
+func (llq *LossyLifoQueue) GetAll() []interface{} {
+	var items []interface{}
+	for e := llq.Data.Front(); e != nil; e = e.Next() {
+		items = append(items, e.Value)
+	}
+	return items
+}
+
 func (llq *LossyLifoQueue) MarshalJSON() ([]byte, error) {
 	// Extract items from the linked list into a slice for easier marshaling.
 	var items []interface{}
