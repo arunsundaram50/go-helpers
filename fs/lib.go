@@ -26,8 +26,12 @@ func Touch(filename string) error {
 
 func EnsureDir(dirPath string) error {
 	info, err := os.Stat(dirPath)
-	if os.IsNotExist(err) {
-		return os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.MkdirAll(dirPath, os.ModePerm)
+		}
+	} else {
+		return err // permission or some other error
 	}
 
 	if !info.IsDir() {
