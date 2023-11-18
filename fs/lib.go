@@ -29,9 +29,9 @@ func EnsureDir(dirPath string) error {
 	if err != nil {
 		if os.IsNotExist(err) {
 			return os.MkdirAll(dirPath, os.ModePerm)
+		} else {
+			return err // permission or some other error
 		}
-	} else {
-		return err // permission or some other error
 	}
 
 	if !info.IsDir() {
