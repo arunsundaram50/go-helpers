@@ -7,8 +7,33 @@ import (
 	"testing"
 )
 
-var comparator = func(a, b interface{}) bool {
-	return a.(int) == b.(int)
+var comparator = func(a, b int) bool {
+	return a == b
+}
+
+var strComparator = func(a, b string) bool {
+	return a == b
+}
+
+var testData = []string{
+	"/mnt/8tb1/photos",
+	"/mnt/8tb1/photos/DVD-songs",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam/Aval",
+	"/mnt/8tb1/photos/DVD-songs",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam/Virunnukari",
+	"/home/asundaram/apps/go-lab/23-fiber-static-serve",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam/Virunnukari",
+	"/mnt/8tb1/photos/DVD-songs/Malayalam",
+}
+
+func TestDuplicateElimination(t *testing.T) {
+	q := NewLossyLifoQueue(10, strComparator)
+	for _, s := range testData {
+		q.Add(s)
+	}
+	fmt.Printf("%v\n", q)
 }
 
 func TestIntOperations(t *testing.T) {
@@ -33,12 +58,12 @@ func TestIntOperations(t *testing.T) {
 		t.Fatalf("Expected %s, got %s", expected, fmt.Sprintf("%v", queue))
 	}
 
-	peek_val := queue.Peek()
+	peek_val, _ := queue.Peek()
 	if peek_val != 4 {
 		t.Fatalf("Peek expected %d, got %d", 4, peek_val)
 	}
 
-	pop_val := queue.Pop()
+	pop_val, _ := queue.Pop()
 	if pop_val != 4 {
 		t.Fatalf("Pop expected %d, got %d", 4, pop_val)
 	}
@@ -47,10 +72,6 @@ func TestIntOperations(t *testing.T) {
 	if queue.String() != expected {
 		t.Fatalf("Expected %s, got %s", expected, fmt.Sprintf("%v", queue))
 	}
-}
-
-func strComparator(a, b interface{}) bool {
-	return a.(string) == b.(string)
 }
 
 func TestStringOperations(t *testing.T) {
