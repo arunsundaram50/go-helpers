@@ -19,15 +19,19 @@ var strComparator = func(a, b string) bool {
 var testData = []string{
 	"/mnt/8tb-disk/photos",
 	"/mnt/8tb-disk/videos",
+	"/mnt/8tb-disk/documents",
 	"/mnt/8tb-disk/photos",
+	"/mnt/8tb-disk/documents/myresume.docx",
 	"/mnt/8tb-disk/documents",
 	"/mnt/8tb-disk/photos",
 	"/mnt/8tb-disk/photos",
 }
 
 func TestDuplicateElimination(t *testing.T) {
-	q := NewLossyLifoQueue(10, strComparator)
+	q := NewLossyLifoQueue(5, strComparator)
 	for _, s := range testData {
+		bytes, _ := json.MarshalIndent(q, "", "  ")
+		json.Unmarshal(bytes, q)
 		q.Add(s)
 	}
 	fmt.Printf("%v\n", q)

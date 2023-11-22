@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -78,17 +79,17 @@ func (llq *LossyLifoQueue[T]) Peek() (T, bool) {
 
 func (llq *LossyLifoQueue[T]) String() string {
 	sb := strings.Builder{}
-	sb.WriteString("[")
+	sb.WriteString("[\n")
 	firstItem := true
 	for e := llq.Data.Front(); e != nil; e = e.Next() {
 		if firstItem {
 			firstItem = false
 		} else {
-			sb.WriteString(", ")
+			sb.WriteString(",\n")
 		}
-		sb.WriteString(fmt.Sprintf("%v", e.Value))
+		sb.WriteString(fmt.Sprintf("  %v", e.Value))
 	}
-	sb.WriteString("]")
+	sb.WriteString("\n]")
 	return sb.String()
 }
 
@@ -134,8 +135,17 @@ func (llq *LossyLifoQueue[T]) UnmarshalJSON(data []byte) error {
 	}
 
 	llq.Data = list.New()
+	llq.lookup = make(map[T]*list.Element) // GOTCHA Not reinitializing the lookup map would make duplicate elimination impossible!
+
 	for _, item := range aux.Items {
-		llq.Data.PushBack(item)
+		typedItem, ok := item.(T)
+		if !ok {
+			log.Printf("incorrect type for %v\n", typedItem)
+			continue
+		}
+
+		newElem := llq.Data.PushBack(typedItem)
+		llq.lookup[typedItem] = newElem
 	}
 	llq.MaxSize = aux.MaxSize
 
