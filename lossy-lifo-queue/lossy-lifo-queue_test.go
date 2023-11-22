@@ -3,6 +3,7 @@ package lossylifoqueue
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 )
@@ -82,6 +83,7 @@ func TestSaveLoad(t *testing.T) {
 	queueForSaving := NewLossyLifoQueue(3, comparator)
 	queueForSaving.Add(3)
 	queueForSaving.Add(2)
+	queueForSaving.Add(2)
 	bytes, err := json.MarshalIndent(queueForSaving, "", " ")
 	if err != nil {
 		t.Fatalf("Unable to marshal queue: %v", err)
@@ -90,6 +92,7 @@ func TestSaveLoad(t *testing.T) {
 
 	var queueLoaded = NewLossyLifoQueue(3, comparator)
 	readBytes, err := os.ReadFile(filename)
+	log.Printf("Read %s\n", string(readBytes))
 	if err != nil {
 		t.Fatalf("Unable to read %s: %v", filename, err)
 	}

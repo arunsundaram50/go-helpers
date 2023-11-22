@@ -28,6 +28,7 @@ func (llq *LossyLifoQueue[T]) Add(item T) {
 	// Check if item exists using the lookup map
 	if elem, found := llq.lookup[item]; found {
 		llq.Data.Remove(elem)
+		delete(llq.lookup, item) // GOTCHA deleting from the map helps keep the list and map in sync so that the code below does not cause duplicates
 	}
 
 	// Add item to the end
