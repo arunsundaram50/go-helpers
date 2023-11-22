@@ -20,6 +20,8 @@ var testData = []string{
 	"/mnt/8tb-disk/videos",
 	"/mnt/8tb-disk/photos",
 	"/mnt/8tb-disk/documents",
+	"/mnt/8tb-disk/photos",
+	"/mnt/8tb-disk/photos",
 }
 
 func TestDuplicateElimination(t *testing.T) {
