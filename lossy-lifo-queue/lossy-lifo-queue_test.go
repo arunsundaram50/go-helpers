@@ -16,16 +16,10 @@ var strComparator = func(a, b string) bool {
 }
 
 var testData = []string{
-	"/mnt/8tb1/photos",
-	"/mnt/8tb1/photos/DVD-songs",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam/Aval",
-	"/mnt/8tb1/photos/DVD-songs",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam/Virunnukari",
-	"/home/asundaram/apps/go-lab/23-fiber-static-serve",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam/Virunnukari",
-	"/mnt/8tb1/photos/DVD-songs/Malayalam",
+	"/mnt/8tb-disk/photos",
+	"/mnt/8tb-disk/videos",
+	"/mnt/8tb-disk/photos",
+	"/mnt/8tb-disk/documents",
 }
 
 func TestDuplicateElimination(t *testing.T) {
