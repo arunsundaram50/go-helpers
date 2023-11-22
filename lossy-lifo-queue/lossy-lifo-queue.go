@@ -109,7 +109,10 @@ func (llq *LossyLifoQueue[T]) MarshalJSON() ([]byte, error) {
 	// Extract items from the linked list into a slice for easier marshaling.
 	var items []interface{}
 	for e := llq.Data.Front(); e != nil; e = e.Next() {
-		items = append(items, e.Value)
+		// Append
+		// items = append(items, e.Value)
+		// Prepend
+		items = append([]interface{}{e.Value}, items...)
 	}
 
 	// Create an auxiliary struct that represents the data we want to marshal.
@@ -137,7 +140,8 @@ func (llq *LossyLifoQueue[T]) UnmarshalJSON(data []byte) error {
 	llq.Data = list.New()
 	llq.lookup = make(map[T]*list.Element) // GOTCHA Not reinitializing the lookup map would make duplicate elimination impossible!
 
-	for _, item := range aux.Items {
+	for i := len(aux.Items) - 1; i >= 0; i-- {
+		item := aux.Items[i]
 		typedItem, ok := item.(T)
 		if !ok {
 			log.Printf("incorrect type for %v\n", typedItem)
