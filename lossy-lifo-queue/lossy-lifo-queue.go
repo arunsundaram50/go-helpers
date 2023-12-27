@@ -110,9 +110,9 @@ func (llq *LossyLifoQueue[T]) MarshalJSON() ([]byte, error) {
 	var items []interface{}
 	for e := llq.Data.Front(); e != nil; e = e.Next() {
 		// Append
-		// items = append(items, e.Value)
+		items = append(items, e.Value)
 		// Prepend
-		items = append([]interface{}{e.Value}, items...)
+		// items = append([]interface{}{e.Value}, items...)
 	}
 
 	// Create an auxiliary struct that represents the data we want to marshal.

@@ -25,12 +25,14 @@ var testData = []string{
 	"/mnt/8tb-disk/documents",
 	"/mnt/8tb-disk/photos",
 	"/mnt/8tb-disk/photos",
+	"/mnt/8tb-disk/documents/myresume.docx",
 }
 
 func TestDuplicateElimination(t *testing.T) {
 	q := NewLossyLifoQueue(5, strComparator)
 	for _, s := range testData {
 		bytes, _ := json.MarshalIndent(q, "", "  ")
+		fmt.Printf("%s\n", string(bytes))
 		json.Unmarshal(bytes, q)
 		q.Add(s)
 	}
